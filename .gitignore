@@ -5,3 +5,4 @@ local_rag.db
 *.db-journal
 .env
 foundry_local_data/
+/docs
