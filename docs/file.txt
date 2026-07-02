@@ -11,3 +11,22 @@ Aracın aydınlatma, cam kilitleri ve ayna katlama gibi özelliklerini FRM modü
 
 Bölüm 4: WinKFP ile EGS (Şanzıman) ve DME (Motor) Yazılım Güncellemesi
 Eğer aracın şanzımanında vuruntu varsa veya motor beynine daha güncel bir fabrika yazılımı atılacaksa WinKFP kullanılır. WinKFP'nin düzgün çalışması için C:\EC-APPS\NFS\DATA klasöründeki SP-Daten dosyalarının aracın yılından daha yeni bir versiyona sahip olması şarttır. Şanzıman (EGS) güncellemesi yapılırken en kritik kural voltaj korumasıdır. Kontaklar açıkken araç çok fazla akım çeker. Bu nedenle aküye sadece bir şarj cihazı değil, minimum 50 Amperlik profesyonel bir güç kaynağı (Power Supply) bağlanmalı ve işlem boyunca voltajın 13.5V ile 14.2V arasında sabit kaldığından kesinlikle emin olunmalıdır. Voltajın 12V altına düşmesi durumunda yazılım atma işlemi yarıda kesilir ve modül "brick" (kullanılamaz) hale gelir. WinKFP üzerinde "Comfort Mode" seçilir, "Update ZUSB" butonuna basılır ve EGS modülü seçilerek "Prog. ZB Update" ile flaşlama işlemi başlatılır. İşlem sonrası adaptasyonların sıfırlanması için Tool32 veya INPA kullanılmalıdır.
+
+
+"E93_NCS_Expert_FRM_Kodlama": "NCS Expert ile FRM (Ayak Boşluğu Modülü) modülüne bağlanmak için profilin 'Expertmode' olarak seçildiğinden emin olun. F1 (VIN/ZCS/FA) ve ardından F3 (ZCS/FA f. ECU) tuşlarına basarak E89 şasi üzerinden iletişim kurabilirsiniz. Nettodat dosyalarını okurken hata almamak için profil şifrelerinin doğru girilmesi gerekir.",
+
+"WinKFP_EGS_Guncelleme": "WinKFP kullanarak EGS (Şanzıman) modülüne yeni yazılım atarken her zaman SP-Daten dosyalarının güncel olduğundan emin olun ve şarj cihazı bağlayarak voltajın 13.5V üzerinde kalmasını kesinlikle sağlayın. Voltaj dalgalanması modülün çökmesine (brick) neden olabilir.",
+
+"INPA_Hata_Tespiti": "INPA yazılımında E93 araçlar için genel arıza tespiti yapmak istiyorsanız, ana menüden F9 (E90/E91/E92/E93) seçilmeli ve 'Functional Jobs' altından 'Read Error Memory' komutu çalıştırılmalıdır. Bu sayede araçtaki tüm modüllerin genel hata dökümü tek ekranda görülebilir.",
+
+"Tool32_CTM_Reset": "Cabrio tavan modülü (CTM) sensör hatası veya voltaj düşüklüğü nedeniyle kilitlendiğinde, Tool32 üzerinden ctm_89.prg dosyası yüklenmeli ve 'steuern_reset' veya 'fs_loeschen' (hata silme) job komutları sırasıyla çalıştırılmalıdır. İşlem sonrası tavanın fiziksel durumu kontrol edilmelidir.",
+
+"KDCAN_Kablo_Konfigurasyonu": "Özel K+DCAN diagnostik donanımının stabil çalışması ve EDIABAS hatalarını önlemek için Windows Aygıt Yöneticisi üzerinden COM portu 'COM1' olarak ayarlanmalıdır. Ayrıca Gelişmiş Ayarlar sekmesindeki 'Latency Timer' (Gecikme Süresi) değeri mutlaka 1 ms'ye düşürülmelidir.",
+
+"WinOLS_Hex_Duzenleme": "WinOLS yazılımı ile ikili (binary) dosya konfigürasyonları yapılırken, veri bloklarındaki hex değerlerini değiştirirken checksum (sağlama toplamı) hesaplamasının yazılım tarafından otomatik doğrulandığından emin olunmalıdır. Hatalı checksum, aracın beyninin (DME/DDE) kilitlenmesine yol açar.",
+
+"SFTTrainer_LLM_Optimizasyonu": "Yerel dil modellerini (Local LLMs) SFTTrainer ile eğitirken veya ince ayar (fine-tuning) yaparken, donanım kaynaklarını verimli kullanmak için batch size düşük tutulmalı ve gradient accumulation adımları artırılmalıdır. Bu işlem, sistem mimarisindeki veri akışı (DFD Level 1) için darboğazları engeller.",
+
+"AI_Arac_Copilot_Vizyonu": "Yapay zeka destekli araç Co-Pilot sistemi, sürüş alışkanlıklarını ve anlık OBD verilerini analiz eden bir modeldir. Bu model, anlık verileri yorumlayarak buji ateşleme zamanlaması gibi metrikler üzerinden parça değişimi veya periyodik bakım önerilerini RAG altyapısıyla gerçek zamanlı olarak sürücüye sunar."
+
+"Emirkan": "Duduyu çok sevdiği aşikar"
