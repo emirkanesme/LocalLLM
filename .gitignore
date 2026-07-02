@@ -1,0 +1,7 @@
+rag_env/
+__pycache__/
+*.pyc
+local_rag.db
+*.db-journal
+.env
+foundry_local_data/

@@ -1,0 +1,21 @@
+Software Tools:
+E-Sys 3.27.1
+v.4.27.20_PSdZData_Lite (password: bimmerscene.com)
+ESysLauncherPremiumSetup_2.8.0_Build_143.msi
+E-Sys Launcher Premium Rearm 2.0.4
+
+Installation Steps:
+Install ESYS
+Extract and move PSDZdata to C:\Data (password: bimmerscene.com)
+Install launcher premium
+Change clock date between [15-01-2018 ~ 28-06-2018] (see README in E-Sys Launcher Premium Rearm 2.0.4.zip)
+Run EsyslauncherPremium Rearm script as admin
+Run EsyslauncherPremium
+Enter PIN 12345678, Confirm PIN 12345678
+Launch ESYS
+Connection Steps:
+Connect ENET cable to ethernet port
+Wait for few minutes for APIPA (automatic IP after DHCP failure) BEFORE LAUNCHING Esys launcher
+Select car latest option for your model (NO DIRECT options)
+Connect to VIN
+Start coding!
