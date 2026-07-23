@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yerel RAG AI Asistanı</title>
+    <!-- Tailwind CSS (Hızlı UI Geliştirme İçin) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Mesajlaşma alanı için özel scrollbar */
+        #chat-container::-webkit-scrollbar { width: 6px; }
+        #chat-container::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen flex flex-col font-sans">
+
+    <!-- Üst Bilgi Çubuğu (Header) -->
+    <header class="bg-indigo-600 text-white shadow-md p-4 flex justify-between items-center z-10">
+        <h1 class="text-xl font-bold flex items-center gap-2">
+            🧠 Yerel RAG Asistanı
+        </h1>
+        <div class="text-sm bg-indigo-700 px-3 py-1 rounded-full border border-indigo-500">
+            <span class="mr-3">📄 <strong>{{ doc_count }}</strong> Parça İndekslendi</span>
+            <span>⚙️ Model: <strong>{{ model_name }}</strong></span>
+        </div>
+    </header>
+
+    <!-- Sohbet Alanı -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 max-w-4xl w-full mx-auto">
+        <!-- Asistan Karşılama Mesajı -->
+        <div class="flex flex-col gap-1 items-start">
+            <div class="bg-white border border-gray-200 text-gray-800 p-4 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
+                Merhaba! Yerel veritabanınıza bağlı çalışıyorum. Sistemde yüklü olan dokümanlar hakkında bana sorular sorabilirsiniz. Nasıl yardımcı olabilirim?
+            </div>
+        </div>
+    </main>
+
+    <!-- Girdi Alanı (Footer) -->
+    <footer class="bg-white border-t border-gray-200 p-4">
+        <div class="max-w-4xl mx-auto flex gap-3">
+            <input type="text" id="query-input" 
+                class="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                placeholder="Arama yapmak istediğiniz soruyu buraya yazın..." 
+                autocomplete="off">
+            
+            <button id="send-btn" 
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-sm transition-colors flex items-center justify-center min-w-[100px]">
+                Gönder
+            </button>
+        </div>
+    </footer>
+
+    <!-- Frontend Mantığı (JavaScript) -->
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const queryInput = document.getElementById('query-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Kullanıcı mesajı ekleyen fonksiyon
+        function appendUserMessage(message) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex flex-col gap-1 items-end';
+            msgDiv.innerHTML = `
+                <div class="bg-indigo-100 text-indigo-900 px-4 py-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]">
+                    ${message}
+                </div>
+            `;
+            chatContainer.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        // Asistan mesajı ekleyen fonksiyon (Kaynaklar ile birlikte)
+        function appendAssistantMessage(message, sources = []) {
+            let sourceHtml = '';
+            
+            // Eğer kaynaklar dönerse ufak etiketler halinde göster
+            if (sources.length > 0) {
+                const tags = sources.map(s => 
+                    `<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded border border-gray-200" title="Benzerlik: ${s.score}">
+                        ${s.name} (${s.score.toFixed(2)})
+                    </span>`
+                ).join(' ');
+                
+                sourceHtml = `
+                    <div class="mt-3 pt-2 border-t border-gray-100 flex flex-wrap gap-2">
+                        <span class="text-xs text-gray-400 font-semibold mt-1">KAYNAKLAR:</span> ${tags}
+                    </div>
+                `;
+            }
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex flex-col gap-1 items-start';
+            msgDiv.innerHTML = `
+                <div class="bg-white border border-gray-200 text-gray-800 p-4 rounded-2xl rounded-tl-none shadow-sm max-w-[85%]">
+                    <p class="whitespace-pre-wrap">${message}</p>
+                    ${sourceHtml}
+                </div>
+            `;
+            chatContainer.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        // Yükleniyor animasyonu ekleyen fonksiyon
+        function showTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.id = 'typing-indicator';
+            indicator.className = 'flex gap-1 items-start text-gray-500 p-2 italic text-sm';
+            indicator.innerHTML = 'Asistan düşünüyor...';
+            chatContainer.appendChild(indicator);
+            scrollToBottom();
+        }
+
+        // Yükleniyor animasyonunu kaldıran fonksiyon
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // Scroll'u en alta indiren fonksiyon
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Mesaj Gönderme İşlemi
+        async function sendMessage() {
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            // UI'ı güncelle
+            appendUserMessage(query);
+            queryInput.value = '';
+            queryInput.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.classList.add('opacity-70');
+            
+            showTypingIndicator();
+
+            try {
+                // Flask Backend'ine istek at (RAG Pipeline'ı tetikler)
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+                removeTypingIndicator();
+
+                if (response.ok) {
+                    appendAssistantMessage(data.answer, data.sources);
+                } else {
+                    appendAssistantMessage('❌ Hata: ' + (data.error || 'Beklenmeyen bir sorun oluştu.'));
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                appendAssistantMessage('❌ Bağlantı hatası: Sunucuya ulaşılamıyor.');
+            } finally {
+                queryInput.disabled = false;
+                sendBtn.disabled = false;
+                sendBtn.classList.remove('opacity-70');
+                queryInput.focus();
+            }
+        }
+
+        // Event Listeners (Enter tuşu ve buton tıklaması)
+        sendBtn.addEventListener('click', sendMessage);
+        queryInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
